@@ -3,9 +3,17 @@ from microbit import *
 import radio
 
 radio.on()
+radio.config(channel=7, group=42)
 
 threshold1 = 400
 threshold2 = 800
+
+sleep_time = 500
+pulse_low = 4
+pulse = pulse_low
+
+prev_x = 5
+prev_y = 5
 
 while True:
     acc_x = accelerometer.get_x()
@@ -34,10 +42,22 @@ while True:
         y = 1
     else:
         y = 2
-        
-    display.set_pixel(x, y, 9)
+
+    if x == 2 and y == 2:
+        if pulse == 9:
+            delta = -1
+        elif pulse == pulse_low:
+            delta = 1
+        pulse = pulse + delta
+        display.set_pixel(x, y, pulse)
+    else:
+        display.set_pixel(x, y, 9)
     
-    send_string = str(x) + str(y)
-    radio.send(send_string)
+    if x != prev_x or y != prev_y:
+        send_string = str(x) + str(y)
+        radio.send(send_string)
+
+        prev_x = x
+        prev_y = y
     
-    sleep(500)
+    sleep(sleep_time)
